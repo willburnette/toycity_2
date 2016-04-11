@@ -43,7 +43,9 @@ def purchases(toy)
 	end
 
 def total_sales(toy)
-	  toy["purchases"].inject(0) { |total, purchase| total += purchase["price"] }
+	  toy["purchases"].inject(0) do |total, purchase| 
+	  	total += purchase["price"]
+	  end 
 end
 
 def avg_price(toy)
@@ -82,8 +84,54 @@ def make_products_section
 	end
 
 # Brands section methods
+def brands_hash(hash)
+  brands = {}
+  hash['items'].each do |toy|
+    if !brands.include?(toy['brand'].to_sym)
+      brands[toy['brand'].to_sym] = [toy]
+    else
+      brands[toy['brand'].to_sym] << toy
+    end
+  end
+  brands
+end
+
+def brand_stock(products) 
+    products.map { |product| product['stock'] }.reduce(:+)
+	end
+
+def brand_av_price(products)
+  (products.map { |product| product['full-price'].to_f }.reduce(:+)) / products.length
+end
+
+def brand_sales(products)
+  sales = 0.0
+  brands_toys = products.map { |product| product['purchases'] }
+  brands_toys.each do |product|
+    product.each do |sale|
+      sales += sale['price']
+    end
+  end
+  sales
+end
+
 def make_brands_section
 		$report_file.puts ascii_brands
+			brands = brands_hash($products_hash)
+	      brands.each do |brand, products|
+	  # $products_hash["items"].map { |item| item["brand"]}.uniq
+	    # Print the name of the brand
+	    $report_file.puts brand
+	    # Print asterisk line
+	    $report_file.puts line_asterisk
+	    # # Count and print the number of the brand's toys we stock
+	    $report_file.puts "Number of Products: #{brand_stock(products)}"
+	    # Calculate and print the average price of the brand's toys
+	    $report_file.puts "Average Product Price: $#{brand_av_price(products).round(2)}"
+	    # Calculate and print the total sales volume of all the brand's toys combined
+	    $report_file.puts "Total Sales: $#{brand_sales(products).round(2)}"
+	    $report_file.puts "\n"
+	    end
 	end
 
 # Print "Sales Report" in ascii art
